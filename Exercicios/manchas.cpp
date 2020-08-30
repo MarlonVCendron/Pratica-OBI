@@ -3,22 +3,33 @@
 #include <queue>
 using namespace std;
 
+#define MAXS 1000010
+
+int n, m;
+vector<int> g[MAXS];
+int visited[MAXS];
+
+int indx(int i, int j){
+  return m*i + j;
+}
+
 int main(){
-  int n, m; cin >> n >> m;
+  cin >> n >> m;
   int mat[n][m];
-  vector<int> g[n*m];
-  int visited[n*m];
 
   for (size_t i = 0; i < n; i++) {
     for (size_t j = 0; j < m; j++) {
       cin >> mat[i][j];
-      visited[j + m*i] = 0;
+      visited[indx(i, j)] = 0;
     }
   }
 
   for (size_t i = 0; i < n; i++) {
     for (size_t j = 0; j < m; j++) {
-      if(!mat[i][j]) continue;
+      if(!mat[i][j]){
+        visited[indx(i, j)] = 1;
+        continue;
+      }
 
       int off_i[] = {-1, 1, 0, 0};
       int off_j[] = {0, 0, -1, 1};
@@ -29,9 +40,9 @@ int main(){
 
         if(ii < 0 || ii >= n || jj < 0 || jj >= m) continue;
 
-        if(mat[ii][jj])
-          g[j + m*i].push_back(jj + m*ii);
-
+        if(mat[ii][jj]){
+          g[indx(i, j)].push_back(indx(ii, jj));
+        }
       }
     }
   }
@@ -40,22 +51,25 @@ int main(){
   int total = 0;
   for (size_t i = 0; i < n; i++) {
     for (size_t j = 0; j < m; j++) {
-      if(!mat[i][j]) continue;
-      if(visited[j+m*i]) continue;
+      int curr = indx(i, j);
+
+      if(visited[curr]) continue;
+      
+      visited[curr] = 1;
+      total++;
 
       queue<int> fila;
-      fila.push(j + m*i);
-      total++;
+      fila.push(curr);
 
       while (!fila.empty()) {
         int idx = fila.front();
         fila.pop();
 
-        visited[idx] = 1;
-
-        for (size_t k = 0; k < g[idx].size(); k++) {
-          if(!visited[g[idx][k]]){
-            fila.push(g[idx][k]);
+        vector<int> neighbors = g[idx];
+        for (const auto &n : neighbors) {
+          if(!visited[n]){
+            visited[n] = 1;
+            fila.push(n);
           }
         }
       }
